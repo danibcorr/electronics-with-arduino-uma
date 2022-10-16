@@ -1,7 +1,7 @@
 // Definición de los pines
-#define PIN_NTC A0
-#define PIN_MIC A1
-#define PIN_RELE 2
+#define PIN_NTC A1
+#define PIN_MIC A0
+#define PIN_RELE 10
 
 // Definición de los estados
 #define NTC_READ_STATUS 0
@@ -12,6 +12,7 @@
 #define NTC_UMBRAL 400
 #define MIC_UMBRAL 200
 #define NTC_TEMP_AMBIENTE 650
+#define BIAS 25
 
 int espera_ntc = 0;
 int estado = NTC_READ_STATUS;
@@ -25,7 +26,7 @@ void maquina ()
     { 
       act_temp = analogRead(PIN_NTC);
       
-      if((act_temp < NTC_UMBRAL && espera_ntc == 0) || (act_temp < ult_temp)) 
+      if((act_temp < NTC_UMBRAL && espera_ntc == 0) || (act_temp + BIAS - ult_temp < 0)) 
       {
         espera_ntc = 1;
         estado = RELE_ON_STATUS;
@@ -90,6 +91,4 @@ void loop()
   Serial.print("\n");
   
   maquina();
-  
-  delay(500);
 }
