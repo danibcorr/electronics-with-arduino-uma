@@ -10,7 +10,7 @@
 #define RELE_OFF_STATUS 3
 
 #define NTC_UMBRAL 400
-#define MIC_UMBRAL 200
+#define MIC_UMBRAL 510
 #define NTC_TEMP_AMBIENTE 650
 #define BIAS 25
 
