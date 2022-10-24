@@ -1,8 +1,11 @@
 // Librería para la comunicación serie con el Arduino
 import processing.serial.*;
 
-int pixelsize = 5, direction = 1, gridsize  = pixelsize * 7 + 5, puntuacion = 0;
-boolean incy = false;
+// Librería para la emisión de sonidos
+import processing.sound.*;
+
+int tam_pixel = 5, direccion = 1, tam_grid  = tam_pixel * 7 + 5, puntuacion = 0, umbralPiezo = 6, control = 0;
+boolean comprobar = false;
 PFont f;
 
 Jugador jugador;
@@ -13,17 +16,17 @@ ArrayList disparos = new ArrayList();
 Serial Puerto;
 String val;
 
+// Definición de las variables para cargar las imágenes del juego
 PImage img_jugador, img_enemigo;
 
-// Se dispara con el ctrl
+// Definición de la variable para el fichero de sonido
+SoundFile explosion, fin;
 
 void setup() 
 {
     // Configuración del puerto serie con Arduino
-    String portName = Serial.list()[1];
+    String portName = Serial.list()[0];
     Puerto = new Serial(this, portName, 9600);
-    
-    noStroke();
     
     // Tamaño de la pantalla
     size(800, 550);
@@ -33,87 +36,100 @@ void setup()
     crearEnemigos();
     
     img_jugador = loadImage("jugador.png");
-    img_enemigo = loadImage("enemigo.png");
-
-    f = createFont("Arial", 36, true);
+    img_enemigo = loadImage("enemigo.png");  
+    
+    explosion = new SoundFile(this, "Explosion.wav");
+    fin = new SoundFile(this, "Fin.wav");
 }
 
 void draw() 
 {
-  if(Puerto.available() > 0) 
-  {
-    background(loadImage("fondo.png"));
+    if(Puerto.available() > 0) 
+    {
+        background(loadImage("fondo.png"));
+        
+        if(enemigos.size() == 0)
+        {
+          controlLetras(2);
+        }
+        else
+        {
+          controlLetras(1);
+        }
     
-    if (enemigos.size() == 0)
-    {
-      finJuego();
-    }
-    else
-    {
-      dibujarPuntuacion();
-    }
-
-    jugador.draw();
-
-    for(int i = 0; i < disparos.size(); i++) 
-    {
-        ArmaJugador bullet = (ArmaJugador) disparos.get(i);
-        bullet.draw();
-    }
-
-    for(int i = 0; i < enemigos.size(); i++) 
-    {
-        
-        Enemigo enemy = (Enemigo) enemigos.get(i);
-        
-        if (enemy.outside() == true) 
+        jugador.draw();
+    
+        for(int i = 0; i < disparos.size(); i++) 
         {
-            direction *= (-1);
-            incy = true;
-            break;
+            ArmaJugador bullet = (ArmaJugador) disparos.get(i);
+            bullet.draw();
         }
-    }
-
-    for (int i = 0; i < enemigos.size(); i++) 
-    {
-        
-      Enemigo enemy = (Enemigo) enemigos.get(i);
-        
-        if (!enemy.alive()) 
+    
+        for(int i = 0; i < enemigos.size(); i++) 
         {
-            enemigos.remove(i);
-        } 
-        else 
-        {
-            enemy.draw();
+            Enemigo enemy = (Enemigo) enemigos.get(i);
+            
+            if (enemy.fueraRango() == true) 
+            {
+                direccion *= (-1);
+                comprobar = true;
+                break;
+            }
         }
+    
+        for (int i = 0; i < enemigos.size(); i++) 
+        {
+            
+            Enemigo enemy = (Enemigo) enemigos.get(i);
+            
+            if (enemy.alive() == false) 
+            {
+                enemigos.remove(i);
+            } 
+            else 
+            {
+                enemy.draw();
+            }
+        }
+    
+        comprobar = false;
     }
-
-    incy = false;
-  }
 }
 
-void dibujarPuntuacion() 
+void controlLetras(int i) 
 {
+    f = createFont("Arial", 30, true);
     fill(255);
     textFont(f);
-    text("Puntuacion: " + String.valueOf(puntuacion), 300, 50);
-}
-
-void finJuego() 
-{
-    fill(255);
-    textFont(f);
-    text("Fin del juego", 300, 50);
+    
+    // Mostramos la puntuación
+    if(i == 1)
+    {
+        text("Puntuacion: " + String.valueOf(puntuacion), 300, 50);
+    }
+    
+    // Mostramos el fin de juego
+    else if(i == 2)
+    {
+        if(fin.isPlaying() == false && control != 1)
+        {
+            control = 1;
+            fin.play();
+        }
+        
+        stroke(0);
+        fill(color(random(255), random(255), random(255)));
+        text("Fin del juego", 300, 50);
+    }
 }
 
 void crearEnemigos() 
 {
-    for (int i = 0; i < 10; i++) 
+    for (int i = 0; i < 1; i++) 
     {
-        for (int j = 0; j < 3; j++) 
+        for (int j = 0; j < 1; j++) 
         {
-            enemigos.add(new Enemigo(i*gridsize, j*gridsize + 70));
+            enemigos.add(new Enemigo(i * tam_grid, j * tam_grid + 70));
         }
     }
 }
@@ -131,29 +147,29 @@ class Jugador
 
     void drawSprite(int xpos, int ypos) 
     {
-        image(img_jugador, xpos, ypos, gridsize + 10, gridsize + 10);   
+        image(img_jugador, xpos, ypos, tam_grid + 10, tam_grid + 10);   
     }
 
     Jugador() 
     {
-        x = width/gridsize/2;
-        y = height - (10 * pixelsize);
+        x = width/tam_grid/2;
+        y = height - (10 * tam_pixel);
     }
     
     void updateObj() 
     {
-        if (keyPressed && keyCode == LEFT) 
+        if(keyPressed && keyCode == LEFT) 
         {
             x -= 5;
         }
-        else if (keyPressed && keyCode == RIGHT) 
+        else if(keyPressed && keyCode == RIGHT) 
         {
             x += 5;
         }
         
         val = Puerto.readStringUntil('\n').trim();
         
-        if(val != ""  && Integer.parseInt(val) > 6)
+        if((val != ""  && Integer.parseInt(val) > umbralPiezo) || (keyPressed && keyCode  == ENTER))
         {
           disparos.add(new ArmaJugador(x, y));
           canShoot = false;
@@ -182,7 +198,7 @@ class Enemigo
     void drawSprite(int xpos, int ypos) 
     {
         stroke(0);
-        image(img_enemigo, xpos, ypos, gridsize, gridsize);   
+        image(img_enemigo, xpos, ypos, tam_grid, tam_grid);   
     }
     
     // Constructor de los enemigos
@@ -197,12 +213,12 @@ class Enemigo
     {
         if (frameCount%30 == 0) 
         {
-            x += direction * gridsize;
+            x += direccion * tam_grid;
         }
         
-        if (incy == true) 
+        if (comprobar == true) 
         {
-            y += gridsize / 2;
+            y += tam_grid / 2;
         }
     }
 
@@ -213,7 +229,7 @@ class Enemigo
         {
             ArmaJugador bullet = (ArmaJugador) disparos.get(i);
             
-            if (bullet.coord_x > x && bullet.coord_x < x + 7 * pixelsize + 5 && bullet.coord_y > y && bullet.coord_y < y + 5 * pixelsize) 
+            if (bullet.coord_x > x && bullet.coord_x < x + 7 * tam_pixel + 5 && bullet.coord_y > y && bullet.coord_y < y + 5 * tam_pixel) 
             {
                 disparos.remove(i);
                 
@@ -222,7 +238,8 @@ class Enemigo
                 if (vida == 0) 
                 {
                     stroke(0);
-                    image(loadImage("explosion.png"), x, y, gridsize * 2, gridsize * 2); 
+                    explosion.play();
+                    image(loadImage("explosion.png"), x, y, tam_grid * 2, tam_grid * 2); 
                     puntuacion += 50;
                     return false;
                 }
@@ -234,9 +251,9 @@ class Enemigo
         return true;
     }
 
-    boolean outside() 
+    boolean fueraRango() 
     {
-        return x + (direction*gridsize) < 0 || x + (direction*gridsize) > width - gridsize;
+        return x + (direccion * tam_grid) < 0 || x + (direccion*tam_grid) > width - tam_grid;
     }
 }
 
@@ -247,7 +264,7 @@ class ArmaJugador
 
     ArmaJugador(int xpos, int ypos) 
     {
-        coord_x = xpos + gridsize/2 - 4;
+        coord_x = xpos + (tam_grid / 2) - 4;
         coord_y = ypos;
     }
 
@@ -255,7 +272,7 @@ class ArmaJugador
     {
         stroke(0);
         fill(1, 255, 0);
-        rect(coord_x + 7, coord_y - 14, pixelsize/2, pixelsize * 3);
-        coord_y -= pixelsize * 2;
+        rect(coord_x + 7, coord_y - 14, tam_pixel/2, tam_pixel * 3);
+        coord_y -= tam_pixel * 2;
     }
 }
