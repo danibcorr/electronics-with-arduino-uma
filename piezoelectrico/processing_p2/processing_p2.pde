@@ -20,7 +20,7 @@ String val;
 PImage img_jugador, img_enemigo;
 
 // Definición de la variable para el fichero de sonido
-SoundFile explosion, fin;
+SoundFile explosion, fin, laser;
 
 void setup() 
 {
@@ -39,6 +39,7 @@ void setup()
     img_enemigo = loadImage("enemigo.png");  
     
     explosion = new SoundFile(this, "Explosion.wav");
+    laser = new SoundFile(this, "laser.wav");
     fin = new SoundFile(this, "Fin.wav");
 }
 
@@ -46,11 +47,18 @@ void draw()
 {
     if(Puerto.available() > 0) 
     {
-        background(loadImage("fondo.png"));
+        background(loadImage("fondo.jpg"));
         
         if(enemigos.size() == 0)
         {
           controlLetras(2);
+
+          if(fin.isPlaying() == false)
+          {
+              crearEnemigos();
+              puntuacion = 0;
+              control = 0;
+          }
         }
         else
         {
@@ -62,6 +70,13 @@ void draw()
         for(int i = 0; i < disparos.size(); i++) 
         {
             ArmaJugador bullet = (ArmaJugador) disparos.get(i);
+            
+            // Si el laser del jugador llega a la coordenada de y determinada se eliminará liberando recursos
+            if(bullet.coord_y < 40) 
+            {
+              disparos.remove(i);
+            }
+            
             bullet.draw();
         }
     
@@ -75,6 +90,7 @@ void draw()
                 comprobar = true;
                 break;
             }
+           
         }
     
         for (int i = 0; i < enemigos.size(); i++) 
@@ -119,6 +135,8 @@ void controlLetras(int i)
         
         stroke(0);
         fill(color(random(255), random(255), random(255)));
+        f = createFont("Arial", 30 + random(10), true);
+        textFont(f);
         text("Fin del juego", 300, 50);
     }
 }
@@ -169,16 +187,20 @@ class Jugador
         
         val = Puerto.readStringUntil('\n').trim();
         
-        if((val != ""  && Integer.parseInt(val) > umbralPiezo) || (keyPressed && keyCode  == ENTER))
+        if((val != ""  && Integer.parseInt(val) > umbralPiezo) || (keyPressed && key== ENTER))
         {
           disparos.add(new ArmaJugador(x, y));
           canShoot = false;
           shootdelay = 0;
+          if(!laser.isPlaying())
+          {
+            laser.play();
+          }
         }
       
         shootdelay++;
         
-        if (shootdelay >= 20) 
+        if (shootdelay >= 50) 
         {
             canShoot = true;
         }
