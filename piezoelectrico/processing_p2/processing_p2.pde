@@ -1,10 +1,14 @@
+// ATENCION: Si se usan auriculares bajad el audio, por favor, por su salud.
+
+// Este proyecto es una modificación del código siguiente: https://gist.github.com/ihavenonickname/5cc5b9b1d9b912f704061a241bc096ad
+
 // Librería para la comunicación serie con el Arduino
 import processing.serial.*;
 
 // Librería para la emisión de sonidos
 import processing.sound.*;
 
-int tam_pixel = 5, direccion = 1, tam_grid  = tam_pixel * 7 + 5, puntuacion = 0, umbralPiezo = 6, control = 0;
+int tam_pixel = 5, direccion = 1, tam_grid  = tam_pixel * 7 + 5, puntuacion = 0, umbralPiezo = 2, control = 0;
 boolean comprobar = false;
 PFont f;
 
@@ -143,9 +147,9 @@ void controlLetras(int i)
 
 void crearEnemigos() 
 {
-    for (int i = 0; i < 1; i++) 
+    for (int i = 0; i < 5; i++) 
     {
-        for (int j = 0; j < 1; j++) 
+        for (int j = 0; j < 3; j++) 
         {
             enemigos.add(new Enemigo(i * tam_grid, j * tam_grid + 70));
         }
@@ -186,8 +190,9 @@ class Jugador
         }
         
         val = Puerto.readStringUntil('\n').trim();
+        print(val);
         
-        if((val != ""  && Integer.parseInt(val) > umbralPiezo) || (keyPressed && key== ENTER))
+        if((val != null  && Integer.parseInt(val) > umbralPiezo) || (keyPressed && key == ENTER))
         {
           disparos.add(new ArmaJugador(x, y));
           canShoot = false;
