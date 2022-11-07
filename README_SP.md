@@ -9,7 +9,7 @@ Repositorio para el seguimiento y control de versiones del proyecto a realizar e
 ## 👤 Contribuyentes
 Realizado por Daniel Bazo Correa y 	Cayetano Biehler Pollaci, estudiantes de Grado en Ingeniería de Sistemas Electrónicos de la Universidad de Málaga.
 <br><br>
-La carpeta "piezoelectrico" contiene el código necesario para la elaboración de la práctica 2 de la asignatura. El esqueleto del código, es de [ihavenonickname](https://github.com/ihavenonickname).
+La carpeta "piezoelectrico" contiene el código necesario para la elaboración de la práctica 2 de la asignatura. El código base, es de [ihavenonickname](https://github.com/ihavenonickname).
 
 ## ⭐️ Licencia
 [Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/)
