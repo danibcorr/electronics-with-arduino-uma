@@ -8,7 +8,7 @@ Repository for monitoring and version control of the project to be done in the s
 ## 👤 Contributors
 Made by Daniel Bazo Correa and Cayetano Biehler Pollaci, students of Electronic Systems Engineering at the University of Málaga.
 <br><br>
-The "piezoelectric" folder contains the code necessary for the elaboration of the practice 2 of the course. The code skeleton is from [ihavenonickname](https://github.com/ihavenonickname).
+The "piezoelectric" folder contains the code necessary for the elaboration of the practice 2 of the course. The base code is from [ihavenonickname](https://github.com/ihavenonickname).
 
 ## ⭐️ License
 [Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/)
